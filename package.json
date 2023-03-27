@@ -1,0 +1,19 @@
+{
+  "name": "wiv",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "build": "rollup -c",
+		"watch": "rollup -c -w"
+    },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@rollup/plugin-node-resolve": "^15.0.1",
+    "rollup": "^3.20.2",
+    "web-ifc-viewer": "^1.0.213"
+  }
+}
