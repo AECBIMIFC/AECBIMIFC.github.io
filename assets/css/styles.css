@@ -89,3 +89,26 @@ ul,
     right: 0;
     margin: .5rem;
 }
+
+.ifc-property-menu {
+    border: 1px solid gray;
+    width: 20rem;
+    right: 1rem;
+    top: 5rem;
+    position: absolute;
+    background-color: white;
+}
+
+.ifc-property-item {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    padding: 0.5rem;
+    overflow: auto;
+    border-bottom: solid 1px gray;
+}
+
+.ifc-property-value {
+    width: 100%;
+    text-align: right;
+}
