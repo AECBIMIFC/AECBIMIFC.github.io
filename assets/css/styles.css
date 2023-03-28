@@ -85,9 +85,9 @@ ul,
 
 #logo{
     position: absolute;
-    width: 15%;
-    right: 0;
-    margin: .5rem;
+    width: 10%;
+    right: 0; 
+    margin: .5rem;   
 }
 
 .ifc-property-menu {
