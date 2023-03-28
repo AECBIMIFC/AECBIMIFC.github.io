@@ -3,20 +3,22 @@ import { IfcViewerAPI } from "web-ifc-viewer";
 
 const container = document.getElementById("viewer-container");
 const estructuraIFC = document.querySelector(".ifc-tree-menu");
-const openHide = document.getElementById("open-hide");
-const icono = document.getElementById("icono");
+const propertiesButton = document.getElementById('properties-button');
+const structureButton = document.getElementById('structure-button');
+const propiedades = document.getElementById('ifc-property-menu');
 const viewer = new IfcViewerAPI({
   container,
   backgroundColor: new Color(0xdddddd),
 });
 
-//A_01_Cargar archivo introducidos por usuario
+viewer.axes.setAxes();
+
+//*A_01_Cargar archivo introducidos por usuario
 const input = document.getElementById("file-input");
-// IfcViewerAPI.IFC.setWasmPath('../wasm');
 input.addEventListener(
   "change",
   async (changed) => {
-    await viewer.IFC.setWasmPath("../wasm/");
+    await viewer.IFC.setWasmPath("../config/wasm/");
     const ifcURL = URL.createObjectURL(changed.target.files[0]);
     const model = await viewer.IFC.loadIfcUrl(ifcURL);
     viewer.context.renderer.postProduction.active = true;
@@ -27,10 +29,9 @@ input.addEventListener(
   false
 );
 
-//A_02_Mostrar estructura IFC
+//*A_02_Mostrar estructura IFC
 
 // Tree view
-
 const toggler = document.getElementsByClassName("caret");
 for (let i = 0; i < toggler.length; i++) {
   toggler[i].onclick = () => {
@@ -42,7 +43,6 @@ for (let i = 0; i < toggler.length; i++) {
 }
 
 // Spatial tree menu
-
 function createTreeMenu(ifcProject) {
   const root = document.getElementById("tree-root");
   const ifcProjectNode = createNestedChild(root, ifcProject);
@@ -105,12 +105,10 @@ function createSimpleChild(parent, node) {
   };
 }
 
-//A_03_Mostrar propiedades elementos al hacer click
+//*A_03_Mostrar propiedades elementos al hacer click
 const propsGUI = document.getElementById("ifc-property-menu-root");
-
 function createPropertiesMenu(properties) {
-    console.log(properties);
-
+   
     removeAllChildren(propsGUI);
 
     delete properties.psets;
@@ -121,7 +119,6 @@ function createPropertiesMenu(properties) {
     for (let key in properties) {
         createPropertyEntry(key, properties[key]);
     }
-
 }
 
 function createPropertyEntry(key, value) {
@@ -149,30 +146,55 @@ function removeAllChildren(element) {
     }
 }
 
-//A_05_Resaltar elementos haciendo hover/click en ellos
-window.onclick = async () => {
-  const result = await viewer.IFC.selector.pickIfcItem();
+//*A_05_Resaltar elementos haciendo hover/click en ellos
+window.onclick = async () => {  
+  //*Poner segundo parametro a false para que la selección anterioir no se elimine
+  const result = await viewer.IFC.selector.pickIfcItem();  
   if (!result) return;
   const { modelID, id } = result;
-  const props = await viewer.IFC.getProperties(modelID, id, true, false);
+  const props = await viewer.IFC.getProperties(modelID, id);      
   createPropertiesMenu(props);
 };
 window.onmousemove = async () => await viewer.IFC.selector.prePickIfcItem();
 
-//Estilos
-function mostrarElementos() {
-  estructuraIFC.classList.remove("ocultar");
-  openHide.classList.remove("ocultar");
-  openHide.style.left = "24rem";
+//*A_10_Realizar cortes en el plano
+const clipperButton = document.getElementById('clipper-button');
+let clippingPlanesActive = false;
+clipperButton.onclick = () => {
+  clippingPlanesActive = !clippingPlanesActive;
+  viewer.clipper.active = clippingPlanesActive;
+
+  if(clippingPlanesActive){
+    clipperButton.classList.add('active-buttons');
+  }else{
+    clipperButton.classList.remove('active-buttons');
+  }
 }
 
-openHide.addEventListener("click", () => {
-  estructuraIFC.classList.toggle("ocultar");
-  if (openHide.style.left == "24rem") {
-    openHide.style.left = "0";
-    icono.className = "fa-solid fa-arrow-right";
-  } else {
-    openHide.style.left = "24rem";
-    icono.className = "fa-solid fa-arrow-left";
+window.ondblclick = () => {
+  if(clippingPlanesActive){
+    viewer.clipper.createPlane();
   }
+}
+
+window.onkeydown = (event) => {
+  if(event.code === 'Delete' && clippingPlanesActive){
+    viewer.clipper.deleteAllPlanes();
+  }
+}
+
+
+//*EXTRAS
+function mostrarElementos() {
+  buttons.classList.remove("ocultar");  
+}
+
+structureButton.addEventListener("click", () => {
+  estructuraIFC.classList.toggle("ocultar");  
+  structureButton.classList.toggle("active-buttons"); 
+});
+
+propertiesButton.addEventListener("click", () => {
+  propiedades.classList.toggle("ocultar");
+  propertiesButton.classList.toggle("active-buttons");   
 });

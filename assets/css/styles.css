@@ -79,15 +79,12 @@ ul,
   margin-top: .5rem;
   font-size: 2rem;
 }
-.ocultar{
-    display: none;
-}
 
 #logo{
     position: absolute;
     width: 10%;
-    right: 0; 
-    margin: .5rem;   
+    right: 0;
+    margin: .5rem;
 }
 
 .ifc-property-menu {
@@ -111,4 +108,40 @@ ul,
 .ifc-property-value {
     width: 100%;
     text-align: right;
+}
+
+#buttons{
+  position: absolute;
+  display: flex;
+  flex-direction: row;
+  gap: 3rem;
+  bottom: 10%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  
+}
+
+.button{
+  display: grid;
+  place-content: center;
+  background: #154483;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  color: #f8f5f5;
+  font-size: 1.3em;
+  cursor: pointer;
+}
+
+.button:hover{
+  background-color: #a22339;
+  transition: .5s;
+}
+
+.active-buttons{
+  background-color: #a22339;
+}
+
+.ocultar{
+  display: none !important;
 }
