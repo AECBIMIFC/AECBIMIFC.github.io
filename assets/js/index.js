@@ -3,15 +3,14 @@ import { IfcViewerAPI } from "web-ifc-viewer";
 
 const container = document.getElementById("viewer-container");
 const estructuraIFC = document.querySelector(".ifc-tree-menu");
-const propertiesButton = document.getElementById('properties-button');
-const structureButton = document.getElementById('structure-button');
-const propiedades = document.getElementById('ifc-property-menu');
+const propertiesButton = document.getElementById("properties-button");
+const structureButton = document.getElementById("structure-button");
+const propiedades = document.getElementById("ifc-property-menu");
+let clippingPlanesActive = false;
 const viewer = new IfcViewerAPI({
   container,
   backgroundColor: new Color(0xdddddd),
 });
-
-viewer.axes.setAxes();
 
 //*A_01_Cargar archivo introducidos por usuario
 const input = document.getElementById("file-input");
@@ -20,9 +19,12 @@ input.addEventListener(
   async (changed) => {
     await viewer.IFC.setWasmPath("../config/wasm/");
     const ifcURL = URL.createObjectURL(changed.target.files[0]);
-    const model = await viewer.IFC.loadIfcUrl(ifcURL);
+    const model = await viewer.IFC.loadIfcUrl(ifcURL, true);
     viewer.context.renderer.postProduction.active = true;
-    const ifcProject = await viewer.IFC.getSpatialStructure(model.modelID);
+    const ifcProject = await viewer.IFC.getSpatialStructure(
+      model.modelID,
+      true
+    );    
     createTreeMenu(ifcProject);
     mostrarElementos();
   },
@@ -51,8 +53,12 @@ function createTreeMenu(ifcProject) {
   });
 }
 
-function nodeToString(node) {
-  return `${node.type} - ${node.expressID}`;
+function nodeToString(node) {      
+  if (node.Name) {
+    return `${node.type} - ${node.Name.value}`;
+  } else{
+    return node.type;
+  }
 }
 
 function constructTreeMenuNode(parent, node) {
@@ -101,100 +107,91 @@ function createSimpleChild(parent, node) {
   };
 
   childNode.onclick = async () => {
-    viewer.IFC.selector.pickIfcItemsByID(0, [node.expressID]);
+    viewer.IFC.selector.pickIfcItemsByID(0, [node.expressID], true);
   };
 }
 
 //*A_03_Mostrar propiedades elementos al hacer click
 const propsGUI = document.getElementById("ifc-property-menu-root");
 function createPropertiesMenu(properties) {
-   
-    removeAllChildren(propsGUI);
-
-    delete properties.psets;
-    delete properties.mats;
-    delete properties.type;
-
-
-    for (let key in properties) {
-        createPropertyEntry(key, properties[key]);
-    }
+  removeAllChildren(propsGUI);
+  for (let key in properties) {
+    createPropertyEntry(key, properties[key]);
+  }
 }
 
 function createPropertyEntry(key, value) {
-    const propContainer = document.createElement("div");
-    propContainer.classList.add("ifc-property-item");
+  const propContainer = document.createElement("div");
+  propContainer.classList.add("ifc-property-item");
 
-    if(value === null || value === undefined) value = "undefined";
-    else if(value.value) value = value.value;
+  if (value === null || value === undefined) value = "undefined";
+  else if (value.value) value = value.value;
 
-    const keyElement = document.createElement("div");
-    keyElement.textContent = key;
-    propContainer.appendChild(keyElement);
+  const keyElement = document.createElement("div");
+  keyElement.textContent = key;
+  propContainer.appendChild(keyElement);
 
-    const valueElement = document.createElement("div");
-    valueElement.classList.add("ifc-property-value");
-    valueElement.textContent = value;
-    propContainer.appendChild(valueElement);
+  const valueElement = document.createElement("div");
+  valueElement.classList.add("ifc-property-value");
+  valueElement.textContent = value;
+  propContainer.appendChild(valueElement);
 
-    propsGUI.appendChild(propContainer);
+  propsGUI.appendChild(propContainer);
 }
 
 function removeAllChildren(element) {
-    while (element.firstChild) {
-        element.removeChild(element.firstChild);
-    }
+  while (element.firstChild) {
+    element.removeChild(element.firstChild);
+  }
 }
 
 //*A_05_Resaltar elementos haciendo hover/click en ellos
-window.onclick = async () => {  
-  //*Poner segundo parametro a false para que la selección anterioir no se elimine
-  const result = await viewer.IFC.selector.pickIfcItem();  
+window.onclick = async () => {
+  //*Poner segundo parametro a false para que la selección anterior no se elimine
+  const result = await viewer.IFC.selector.pickIfcItem(true);
   if (!result) return;
   const { modelID, id } = result;
-  const props = await viewer.IFC.getProperties(modelID, id);      
+  const props = await viewer.IFC.getProperties(modelID, id, true, true);  
   createPropertiesMenu(props);
 };
 window.onmousemove = async () => await viewer.IFC.selector.prePickIfcItem();
 
 //*A_10_Realizar cortes en el plano
-const clipperButton = document.getElementById('clipper-button');
-let clippingPlanesActive = false;
+const clipperButton = document.getElementById("clipper-button");
 clipperButton.onclick = () => {
   clippingPlanesActive = !clippingPlanesActive;
   viewer.clipper.active = clippingPlanesActive;
 
-  if(clippingPlanesActive){
-    clipperButton.classList.add('active-buttons');
-  }else{
-    clipperButton.classList.remove('active-buttons');
+  if (clippingPlanesActive) {
+    clipperButton.classList.add("active-buttons");
+  } else {
+    clipperButton.classList.remove("active-buttons");
   }
-}
+};
 
 window.ondblclick = () => {
-  if(clippingPlanesActive){
+  if (clippingPlanesActive) {
     viewer.clipper.createPlane();
   }
-}
+};
 
 window.onkeydown = (event) => {
-  if(event.code === 'Delete' && clippingPlanesActive){
+  if (event.code === "Delete" && clippingPlanesActive) {
     viewer.clipper.deleteAllPlanes();
   }
-}
-
+};
 
 //*EXTRAS
 function mostrarElementos() {
-  buttons.classList.remove("ocultar");  
+  buttons.classList.remove("ocultar");
 }
 
 structureButton.addEventListener("click", () => {
-  estructuraIFC.classList.toggle("ocultar");  
-  structureButton.classList.toggle("active-buttons"); 
+  estructuraIFC.classList.toggle("ocultar");
+  structureButton.classList.toggle("active-buttons");
 });
 
 propertiesButton.addEventListener("click", () => {
   propiedades.classList.toggle("ocultar");
-  propertiesButton.classList.toggle("active-buttons");   
+  propertiesButton.classList.toggle("active-buttons");
 });
