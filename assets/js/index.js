@@ -12,6 +12,7 @@ const viewer = new IfcViewerAPI({
   backgroundColor: new Color(0xdddddd),
 });
 
+
 //*A_01_Cargar archivo introducidos por usuario
 const input = document.getElementById("file-input");
 input.addEventListener(
@@ -146,8 +147,7 @@ function removeAllChildren(element) {
 }
 
 //*A_05_Resaltar elementos haciendo hover/click en ellos
-window.onclick = async () => {
-  //*Poner segundo parametro a false para que la selección anterior no se elimine
+window.onclick = async () => {  
   const result = await viewer.IFC.selector.pickIfcItem(true);
   if (!result) return;
   const { modelID, id } = result;
