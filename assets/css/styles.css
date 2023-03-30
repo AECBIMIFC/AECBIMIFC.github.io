@@ -154,8 +154,9 @@ ul,
   width: 60px;
   height: 60px;
   color: #f8f5f5;
-  font-size: 1.3em;
   cursor: pointer;
+  font-size: 1.3em;
+  
 }
 
 .button:hover{
