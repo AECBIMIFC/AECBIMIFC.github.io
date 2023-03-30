@@ -22,7 +22,8 @@
         ><i class="fa-solid fa-code-branch"></i
       ></a>
       <a id="properties-button" class="button"
-        ><i class="fa-solid fa-info"></i></a>
+        ><i class="fa-solid fa-info"></i
+      ></a>
       <a id="clipper-button" class="button"
         ><i class="fa-solid fa-scissors"></i
       ></a>
@@ -34,13 +35,21 @@
       </div>
       <div id="ifc-property-menu-root"></div>
     </div>
-    <img src="assets/img/logoIneco.png" alt="Logo" id="logo" />    
+    <div id="right-container">
+      <div id="imagen">
+        <img src="assets/img/logoIneco.png" alt="Logo" id="logo" />
+      </div>
+      <div id="tabla" class="ocultar">
+        <table id="propiedades"></table>
+      </div>
+    </div>
     <div class="ifc-tree-menu ocultar">
       <ul id="myUL">
         <li id="tree-root"></li>
       </ul>
     </div>
     <input type="file" id="file-input" />
+    <script src="assets/js/jquery-3.6.3.min.js"></script>
     <script src="assets/js/bundle.js"></script>
   </body>
 </html>

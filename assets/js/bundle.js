@@ -121869,13 +121869,13 @@ const container = document.getElementById("viewer-container");
 const estructuraIFC = document.querySelector(".ifc-tree-menu");
 const propertiesButton = document.getElementById("properties-button");
 const structureButton = document.getElementById("structure-button");
-const propiedades = document.getElementById("ifc-property-menu");
-let clippingPlanesActive = false;
+const propiedades = document.getElementById("tabla");
 const viewer = new IfcViewerAPI({
   container,
   backgroundColor: new Color(0xdddddd),
 });
-
+viewer.context.ifcCamera.cameraControls.setLookAt(50, 50, 50, 0, 0, 0);
+viewer.context.ifcCamera.cameraControls.dollyToCursor = true;
 
 //*A_01_Cargar archivo introducidos por usuario
 const input = document.getElementById("file-input");
@@ -121889,7 +121889,7 @@ input.addEventListener(
     const ifcProject = await viewer.IFC.getSpatialStructure(
       model.modelID,
       true
-    );    
+    );
     createTreeMenu(ifcProject);
     mostrarElementos();
   },
@@ -121897,7 +121897,6 @@ input.addEventListener(
 );
 
 //*A_02_Mostrar estructura IFC
-
 // Tree view
 const toggler = document.getElementsByClassName("caret");
 for (let i = 0; i < toggler.length; i++) {
@@ -121918,7 +121917,7 @@ function createTreeMenu(ifcProject) {
   });
 }
 
-function nodeToString(node) {      
+function nodeToString(node) {
   if (node.Name) {
     return `${node.type} - ${node.Name.value}`;
   } else {
@@ -121972,56 +121971,94 @@ function createSimpleChild(parent, node) {
   };
 
   childNode.onclick = async () => {
-    viewer.IFC.selector.pickIfcItemsByID(0, [node.expressID], true);
+    viewer.IFC.selector.pickIfcItemsByID(0, [node.expressID]);
   };
 }
 
 //*A_03_Mostrar propiedades elementos al hacer click
-const propsGUI = document.getElementById("ifc-property-menu-root");
+
 function createPropertiesMenu(properties) {
-  removeAllChildren(propsGUI);
+  delete properties.mats;
+  delete properties.type;
+  delete properties.OwnerHistory;
+  delete properties.ObjectPlacement;
+  delete properties.Representation;
+  
+  $("#propiedades").html(`
+  <tr>
+          <th class="cabecera">Nombre</th>
+          <th class="cabecera">Valor</th>          
+        </tr>
+  `);
   for (let key in properties) {
     createPropertyEntry(key, properties[key]);
   }
 }
 
 function createPropertyEntry(key, value) {
-  const propContainer = document.createElement("div");
-  propContainer.classList.add("ifc-property-item");
+  const propContainer = document.createElement("tr");
 
   if (value === null || value === undefined) value = "undefined";
   else if (value.value) value = value.value;
-
-  const keyElement = document.createElement("div");
-  keyElement.textContent = key;
-  propContainer.appendChild(keyElement);
-
-  const valueElement = document.createElement("div");
+  const keyElement = document.createElement("th");
+  const valueElement = document.createElement("th");
   valueElement.classList.add("ifc-property-value");
-  valueElement.textContent = value;
-  propContainer.appendChild(valueElement);
+  if (typeof value !== "object") {
+    keyElement.textContent = key;
+    propContainer.appendChild(keyElement);
 
-  propsGUI.appendChild(propContainer);
+    valueElement.textContent = value;
+    propContainer.appendChild(valueElement);
+  } else {
+    if (key === "psets") {
+      mostarPropiedadesPsets(value);
+    }
+  }
+  $("#propiedades").append(propContainer);
 }
+function mostarPropiedadesPsets(value) {
+  for (let index = 0; index < value.length; index++) {
+    //TODO: MOSTRAR ANIDACIÓN
+    // const propContainer = document.createElement("tr");
+    // const keyElement = document.createElement("th");
+    // keyElement.textContent = value[index].Name.value;
 
-function removeAllChildren(element) {
-  while (element.firstChild) {
-    element.removeChild(element.firstChild);
+    let hProps = value[index].HasProperties;
+    for (const clave in hProps) {
+      const propContainer = document.createElement("tr");
+      const keyElement2 = document.createElement("th");
+      const valueElement2 = document.createElement("th");
+      keyElement2.textContent = hProps[clave].Name.value;
+      propContainer.appendChild(keyElement2);
+
+      if (hProps[clave].NominalValue.value) {
+        if (hProps[clave].NominalValue.value == "F") {
+          valueElement2.textContent = "No";
+          propContainer.appendChild(valueElement2);
+        } else {
+          valueElement2.textContent = hProps[clave].NominalValue.value;
+          propContainer.appendChild(valueElement2);
+        }
+      }
+      $("#propiedades").append(propContainer);
+    }
   }
 }
 
 //*A_05_Resaltar elementos haciendo hover/click en ellos
-window.onclick = async () => {  
+window.onclick = async () => {
+  //*Poner segundo parametro a false para que la selección anterior no se elimine
   const result = await viewer.IFC.selector.pickIfcItem(true);
   if (!result) return;
   const { modelID, id } = result;
-  const props = await viewer.IFC.getProperties(modelID, id, true, true);  
+  const props = await viewer.IFC.getProperties(modelID, id, true, true);
   createPropertiesMenu(props);
 };
 window.onmousemove = async () => await viewer.IFC.selector.prePickIfcItem();
 
 //*A_10_Realizar cortes en el plano
 const clipperButton = document.getElementById("clipper-button");
+let clippingPlanesActive = false;
 clipperButton.onclick = () => {
   clippingPlanesActive = !clippingPlanesActive;
   viewer.clipper.active = clippingPlanesActive;
