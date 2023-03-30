@@ -154,11 +154,6 @@ function createPropertyEntry(key, value) {
 }
 function mostarPropiedadesPsets(value) {
   for (let index = 0; index < value.length; index++) {
-    //TODO: MOSTRAR ANIDACIÓN
-    // const propContainer = document.createElement("tr");
-    // const keyElement = document.createElement("th");
-    // keyElement.textContent = value[index].Name.value;
-
     let hProps = value[index].HasProperties;
     for (const clave in hProps) {
       const propContainer = document.createElement("tr");
@@ -167,7 +162,7 @@ function mostarPropiedadesPsets(value) {
       keyElement2.textContent = hProps[clave].Name.value;
       propContainer.appendChild(keyElement2);
 
-      if (hProps[clave].NominalValue.value) {
+      if (hProps[clave].NominalValue != null) {
         if (hProps[clave].NominalValue.value == "F") {
           valueElement2.textContent = "No";
           propContainer.appendChild(valueElement2);

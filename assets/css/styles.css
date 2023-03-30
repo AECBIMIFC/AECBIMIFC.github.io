@@ -15,7 +15,7 @@ body {
   flex-direction: column;
   right: 0;
   gap: 5rem;
-  width: 400px;
+  width: 430px;
 }
 
 
@@ -119,16 +119,14 @@ ul,
 #propiedades {
     border: 1px solid gray;    
     background-color: white;  
-    width: 500px;  
-    margin: .5rem;    
+    width: 430px;  
+    padding: 5px;      
 }
 #tabla{  
-  display: flex;    
-  flex-direction: row;
-  justify-content: flex-end;
-  height: 500px;
+  height: 400px;
   overflow: auto;
   text-align: left;
+  background-color: white;
 }
 
 
